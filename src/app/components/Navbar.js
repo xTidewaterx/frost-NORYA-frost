@@ -32,8 +32,8 @@ export default function Navbar() {
   <div className="flex items-center space-x-2 h-full">
     <img
       className="w-8 h-8 transition-all"
-      src="/norland-logo.png"
-      alt="Norland Logo"
+      src="/NORYA-logo.png"
+      alt="NORYA Logo"
     />
     {isHomePage && showNorya && (
       <span
