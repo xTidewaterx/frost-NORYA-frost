@@ -51,7 +51,7 @@ export default function UserRow() {
                 href={`/profile/${user.uid}`}
                 className="transition-transform duration-300 ease-in-out hover:scale-[1.03]"
               >
-                <div className="avatar-wrapper w-[50vw] sm:w-[180px] md:w-[220px] lg:w-[260px] aspect-square overflow-hidden shadow-md hover:ring-1 hover:ring-slate-300 transition-all">
+                <div className="avatar-wrapper min-w-76 w-[50vw] sm:w-[180px] md:w-[220px] lg:w-[400px] aspect-square overflow-hidden shadow-md hover:ring-1 hover:ring-slate-300 transition-all">
                   <img
                     src={user.photoURL}
                     alt={user.displayName}
@@ -70,22 +70,22 @@ export default function UserRow() {
         </div>
 
         {/* SVG Superellipse Definition */}
-<svg width="0" height="0">
-  <defs>
-    <clipPath id="superellipse" clipPathUnits="objectBoundingBox">
-      <path
-        d="
-          M0.5,0
-          C0.85,0,1,0.15,1,0.5
-          C1,0.85,0.85,1,0.5,1
-          C0.15,1,0,0.85,0,0.5
-          C0,0.15,0.15,0,0.5,0
-          Z
-        "
-      />
-    </clipPath>
-  </defs>
-</svg>
+        <svg width="0" height="0">
+          <defs>
+            <clipPath id="superellipse" clipPathUnits="objectBoundingBox">
+              <path
+                d="
+                  M0.5,0
+                  C0.85,0,1,0.15,1,0.5
+                  C1,0.85,0.85,1,0.5,1
+                  C0.15,1,0,0.85,0,0.5
+                  C0,0.15,0.15,0,0.5,0
+                  Z
+                "
+              />
+            </clipPath>
+          </defs>
+        </svg>
       </section>
 
       <style jsx>{`
