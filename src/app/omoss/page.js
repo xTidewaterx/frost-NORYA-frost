@@ -42,7 +42,7 @@ export default function OmOssPage() {
 
 
         {/* Text */}
-        <div className="px-[10vw] pt-2">
+        <div className="px-[10vw] pt-2 pb-48">
           <p className="text-lg lg:text-xl xl:text-2xl 2xl:text-3xl text-slate-700 leading-relaxed mb-6 font-poppins">
             NORYA er et kreativt fellesskap dedikert til å styrke skapere i Nord-Norge. En kuratert, digital markedsplass hvor vi tror på samarbeid, historiefortelling, og digitale verktøy som bringer mennesker i nord sammen.
           </p>
