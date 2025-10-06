@@ -1,35 +1,17 @@
 import React from "react";
 import { Geist, Geist_Mono, Roboto_Flex, Roboto } from "next/font/google";
 import "./globals.css";
-import { Roboto_Flex } from 'next/font/google';
-import CartWrapper from './utils/cartWrapper'
-import Navbar from "./components/Navbar";
+import CartWrapper from './utils/cartWrapper';
+import Navbar from "../app/components/Navbar"; // your Navbar path
+import Footer from "./components/Footer"; 
 import { AuthProvider } from "./auth/authContext";
-import '../app/styles/omoss.css' ; // Global CSS import here
+import '../app/styles/omoss.css';
+import "../../src/app/globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-
-
-
-    const robotoFlex = Roboto_Flex({
-      weight: ['400', '700'], // Or specify the weights you need
-      subsets: ['latin'], // Or specify the needed subsets
-    });
-
-       const roboto = Roboto({
-      weight: ['400', '700'], // Or specify the weights you need
-      subsets: ['latin'], // Or specify the needed subsets
-    });
-
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const robotoFlex = Roboto_Flex({ weight: ['400', '700'], subsets: ['latin'] });
+const roboto = Roboto({ weight: ['400', '700'], subsets: ['latin'] });
 
 export const metadata = {
   title: "Create Next App",
@@ -40,12 +22,20 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-      className={`${geistSans.variable} ${geistMono.variable} ${robotoFlex.variable} ${roboto.variable}   antialiased`}
+        className={`min-h-screen flex flex-col ${geistSans.variable} ${geistMono.variable} ${robotoFlex.variable} ${roboto.variable} antialiased`}
       >
-      <AuthProvider>  <CartWrapper> <Navbar/>     {children}</CartWrapper></AuthProvider>
-          
+        <AuthProvider>
+          <CartWrapper className="flex flex-col flex-grow">
+            {/* Navbar always visible */}
+            <Navbar />
+            
+            {/* Main content grows to push footer down */}
+            <main className="flex-grow">{children}</main>
 
-  
+            {/* Footer always at bottom */}
+            <Footer />
+          </CartWrapper>
+        </AuthProvider>
       </body>
     </html>
   );

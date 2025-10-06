@@ -26,13 +26,12 @@ export default function Home() {
       {/* Placeholder for your future chat system */}
       {/* You can conditionally render chat components here based on user state */}
  <HeroBanner/>
-<UserRow2/>
+-
 <UserRow/>
 
 
-<SyncUsersButton/>
 
-<Footer/>
+
     </AuthProvider>
   );
 }

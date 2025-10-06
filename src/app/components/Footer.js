@@ -25,7 +25,7 @@ export default function Footer() {
 
         {/* Footer Navigation */}
         <div className="flex space-x-4 text-sm font-light text-gray-300 tracking-wide">
-          <Link href="/about" className="hover:text-yellow-400 transition-colors">Om Oss</Link>
+          <Link href="/omoss" className="hover:text-yellow-400 transition-colors">Om Oss</Link>
           <Link href="/contact" className="hover:text-yellow-400 transition-colors">Kontakt</Link>
           <Link href="/privacy" className="hover:text-yellow-400 transition-colors">Personvern</Link>
         </div>
