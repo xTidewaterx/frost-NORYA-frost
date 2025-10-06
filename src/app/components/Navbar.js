@@ -20,6 +20,8 @@ export default function Navbar() {
         setShowNorya(true);
       }, 1000);
       return () => clearTimeout(timer);
+    } else {
+      setShowNorya(true); // Always show text on non-home pages
     }
   }, [isHomePage]);
 
@@ -28,23 +30,23 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12">
           {/* Logo + NORYA */}
-<Link href="/" className="group flex items-center h-full m-0 pl-2 pr-2 transition-all hover:bg-yellow-400 hover:rounded-b-md">
-  <div className="flex items-center space-x-2 h-full">
-    <img
-      className="w-8 h-8 transition-all"
-      src="/NORYA-logo.png"
-      alt="NORYA Logo"
-    />
-    {isHomePage && showNorya && (
-      <span
-        id="navbarTextTarget"
-        className="text-2xl pl-1 pt-1 font tracking-tight text-sky-700 transition-all duration-500 opacity-0 group-hover:opacity-100"
-      >
-        NORYA
-      </span>
-    )}
-  </div>
-</Link>
+          <Link href="/" className="group flex items-center h-full m-0 pl-2 pr-2 transition-all hover:bg-yellow-300 hover:rounded-b-md">
+            <div className="flex items-center space-x-2 h-full">
+              <img
+                className="w-8 h-8 transition-all"
+                src="/NORYA-logo.png"
+                alt="NORYA Logo"
+              />
+              {showNorya && (
+                <span
+                  id="navbarTextTarget"
+                  className="text-2xl pl-1 pt-1 font tracking-tight text-sky-700 transition-all duration-500 opacity-0 group-hover:opacity-100"
+                >
+                  NORYA
+                </span>
+              )}
+            </div>
+          </Link>
 
           {/* Hamburger Menu (Mobile) */}
           <button
@@ -89,7 +91,7 @@ export default function Navbar() {
               className="hover:bg-yellow-400 hover:text-white hover:rounded-b-md h-full me-0 pr-4 pl-4 py-2 group transition-all"
             >
               <img
-                className="w-5 pt-1 filter hue-rotate-180"
+                className="w-5"
                 src="/shoppingCartIcon.png"
                 alt="Cart"
               />
@@ -100,7 +102,7 @@ export default function Navbar() {
               className="group hover:bg-blue-600 hover:rounded-b-md h-full p-2 pl-2 pr-2 pt-[10px] transition-all"
             >
               <FontAwesomeIcon
-                className="group-hover:invert pr-2 pl-2"
+                className="group-hover:invert pr-2 pl-2 pb-1"
                 icon={faUser}
               />
             </Link>

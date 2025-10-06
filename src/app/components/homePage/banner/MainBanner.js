@@ -64,7 +64,7 @@ export default function MainBanner() {
 
         // Start typing the follow-up message
         const phrase =
-          "Håndlagde produkter fra Nord-Norge, for deg, fra Nord";
+          "Håndlagde produkter fra vakre ville Nord-Norge";
         const container = revealRef.current;
         if (!container) return;
 
@@ -127,13 +127,13 @@ export default function MainBanner() {
 
         <div
           ref={revealRef}
-          className="text-white text-3xl sm:text-4xl text-center p-4 z-20 md:text-6xl
+          className="text-3xl sm:text-4xl text-center p-4 z-20 md:text-7xl 
                      max-w-496
                      min-w-[60vw]
                      [@media(min-width:700px)and(max-width:1270px)]:min-w-[70vw]
                      [@media(min-width:2000px)]:min-w-[50vw]
                      [@media(min-width:700px)and(max-width:1270px)]:text-[3.5rem]
-                     [@media(min-width:2000px)]:text-[5rem]"
+                     [@media(min-width:2000px)]:text-[5rem]" style={{ color: '#ffea00ff' }}
         ></div>
 
         {/* Promises anchored near bottom of banner */}
