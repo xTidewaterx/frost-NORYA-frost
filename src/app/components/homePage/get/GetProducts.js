@@ -45,14 +45,14 @@ export default function GetProducts() {
         const res = await fetch('api/products');
         const json = await res.json();
         if (json.data) {
-          setProducts(json.data);
+          setProducts(json.data.slice(0, 4)); // <-- only take first 4
         } else {
           console.warn('No data returned, using mock products');
-          setProducts(mockProducts);
+          setProducts(mockProducts.slice(0, 4)); // <-- first 4 mock products
         }
       } catch (error) {
         console.error('Error fetching products:', error);
-        setProducts(mockProducts);
+        setProducts(mockProducts.slice(0, 4));
       } finally {
         setLoading(false);
       }
@@ -61,14 +61,13 @@ export default function GetProducts() {
     fetchProducts();
   }, []);
 
-const placeholderCards = Array.from({ length: 4 }).map((_, idx) => (
-  <div
-    key={idx}
-    style={{ animationDelay: `${idx * 75}ms` }}
-    className="group animate-fadeInUp animation-fill-forwards bg-gray-100 rounded-xl overflow-hidden flex flex-col aspect-[9/16]"
-  />
-));
-
+  const placeholderCards = Array.from({ length: 4 }).map((_, idx) => (
+    <div
+      key={idx}
+      style={{ animationDelay: `${idx * 75}ms` }}
+      className="group animate-fadeInUp animation-fill-forwards bg-gray-100 rounded-xl overflow-hidden flex flex-col aspect-[9/16]"
+    />
+  ));
 
   return (
     <div className="w-full py-10">

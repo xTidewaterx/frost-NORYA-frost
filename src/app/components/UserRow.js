@@ -41,12 +41,13 @@ export default function UserRow() {
       <svg width="0" height="0">
         <defs>
           <clipPath id="superellipse" clipPathUnits="objectBoundingBox">
+            {/* Apple-style superellipse / squircle */}
             <path d="
               M0.5,0
-              C0.85,0,1,0.15,1,0.5
-              C1,0.85,0.85,1,0.5,1
-              C0.15,1,0,0.85,0,0.5
-              C0,0.15,0.15,0,0.5,0
+              C0.776,0,1,0.224,1,0.5
+              C1,0.776,0.776,1,0.5,1
+              C0.224,1,0,0.776,0,0.5
+              C0,0.224,0.224,0,0.5,0
               Z
             " />
           </clipPath>
@@ -92,7 +93,7 @@ export default function UserRow() {
       <style jsx>{`
         .avatar-wrapper {
           /* fallback rounded shape for browsers that don't support clip-path */
-          border-radius: 9999px;
+          border-radius: 20%; /* approximate squircle fallback */
         }
       `}</style>
     </div>
