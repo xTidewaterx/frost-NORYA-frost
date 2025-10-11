@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+
+//To retrieve search parameters from a URL in a GET request, you can utilize the URLSearchParams interface. This allows you to easily manage and access query parameters.
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);

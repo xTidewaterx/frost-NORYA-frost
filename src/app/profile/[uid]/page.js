@@ -11,9 +11,15 @@ import {
   addDoc,
   doc,
   getDoc,
+  updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import ChatWindow from '../../../chat/ChatWindow';
 
 export default function ProfilePage() {
@@ -23,9 +29,15 @@ export default function ProfilePage() {
   const [chatId, setChatId] = useState(null);
   const [isChatVisible, setIsChatVisible] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [uploadedPhotos, setUploadedPhotos] = useState([]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const storage = getStorage();
 
   // Track logged-in user
   useEffect(() => {
@@ -38,23 +50,53 @@ export default function ProfilePage() {
 
   // Fetch public profile
   useEffect(() => {
-    if (!profileUser && uid) {
-      const fetchProfile = async () => {
-        try {
-          const userRef = doc(db, 'publicUsers', uid);
-          const snap = await getDoc(userRef);
-          if (snap.exists()) {
-            setProfileUser(snap.data());
-          }
-        } catch (err) {
-          console.error('Failed to fetch profile:', err.message);
+    const fetchProfile = async () => {
+      if (!uid) return;
+      try {
+        const userRef = doc(db, 'publicUsers', uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          const data = snap.data();
+          setProfileUser(data);
+          setUploadedPhotos(data.showcasePhotos || []);
         }
-      };
-      fetchProfile();
-    }
-  }, [uid, profileUser]);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err.message);
+      }
+    };
+    fetchProfile();
+  }, [uid]);
 
-  // Start chat (for logged-in users)
+  // Upload images (for profile owner only)
+  const handleUpload = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    setUploadError('');
+
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const storageRef = ref(storage, `userImages/${uid}/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        uploadedUrls.push(downloadURL);
+      }
+
+      const updatedPhotos = [...uploadedPhotos, ...uploadedUrls];
+      setUploadedPhotos(updatedPhotos);
+
+      const userRef = doc(db, 'publicUsers', uid);
+      await updateDoc(userRef, { showcasePhotos: updatedPhotos });
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploadError('Upload failed. Try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Chat logic
   async function handleStartChat() {
     if (!currentUser || !uid) return;
 
@@ -86,7 +128,7 @@ export default function ProfilePage() {
     setIsChatVisible(true);
   }
 
-  // Handle email/password sign-in
+  // Auth
   async function handleSignIn(e) {
     e.preventDefault();
     try {
@@ -99,7 +141,6 @@ export default function ProfilePage() {
     }
   }
 
-  // Handle Google sign-in
   async function handleGoogleSignIn() {
     try {
       const provider = new GoogleAuthProvider();
@@ -120,11 +161,15 @@ export default function ProfilePage() {
   const photoURL = profileUser.photoURL || '/images/default-avatar.png';
   const isOwnProfile = currentUser?.uid === uid;
 
-  const showcasePhotos = [
+  // Old showcase photos remain visible to everyone
+  const defaultShowcasePhotos = [
     'https://firebasestorage.googleapis.com/v0/b/YOUR_APP/o/photo1.jpg?alt=media',
     'https://firebasestorage.googleapis.com/v0/b/YOUR_APP/o/photo2.jpg?alt=media',
     'https://firebasestorage.googleapis.com/v0/b/YOUR_APP/o/photo3.jpg?alt=media',
   ];
+
+  const combinedPhotos =
+    uploadedPhotos.length > 0 ? uploadedPhotos : defaultShowcasePhotos;
 
   return (
     <div className="bg-white text-[#001f3f] min-h-screen px-6 sm:px-12 py-14 font-serif">
@@ -133,26 +178,56 @@ export default function ProfilePage() {
         <img
           src={photoURL}
           alt={`Portrait of ${displayName}`}
-          className="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-full border-[6px] border-[#001f3f] shadow-md mx-auto mb-5"
+    className="w-86 h-60 sm:w-112 sm:h-68 object-cover rounded-2xl shadow-md mx-auto mb-5"
+
         />
-        <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-wide mb-4 uppercase">
+        <h1 className="text-2xl sm:text-4xl font-bold leading-tight tracking-wide mb-4 uppercase">
           {displayName}
         </h1>
         <p className="text-lg max-w-xl mx-auto italic text-[#4b5060]">
           “Crafting legacy through stories and visuals.”
         </p>
+
+        {/* Edit button (only owner) */}
+        {isOwnProfile && (
+          <div className="mt-6">
+            <button
+              onClick={() => setShowEditor(!showEditor)}
+              className="bg-[#001f3f] text-white px-5 py-2 rounded-full shadow hover:bg-[#0b2b4f] transition"
+            >
+              {showEditor ? 'Close Editor' : 'Edit Photos 🖋️'}
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Upload Editor (visible only to owner) */}
+      {showEditor && isOwnProfile && (
+        <div className="max-w-3xl mx-auto mb-10 bg-gray-50 border p-6 rounded-lg shadow">
+          <h2 className="text-2xl font-semibold mb-4">Add Images to Your Profile</h2>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleUpload}
+            disabled={uploading}
+            className="mb-3"
+          />
+          {uploading && <p className="text-blue-600">Uploading images...</p>}
+          {uploadError && <p className="text-red-500">{uploadError}</p>}
+        </div>
+      )}
 
       {/* Full-width Image */}
       <div className="max-w-4xl mx-auto mb-10">
         <img
-          src={showcasePhotos[0]}
+          src={combinedPhotos[0]}
           alt="Feature banner"
           className="w-full h-[400px] object-cover rounded-md shadow-md"
         />
       </div>
 
-      {/* Editorial Text */}
+      {/* Editorial Text (kept visible to everyone) */}
       <div className="max-w-3xl mx-auto space-y-8 text-lg leading-relaxed text-[#2d2d2d] mb-12">
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed congue, sapien non dignissim
@@ -170,14 +245,14 @@ export default function ProfilePage() {
 
       {/* Two Side-by-Side Images */}
       <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16">
-        {showcasePhotos.slice(1).map((url, idx) => (
+        {combinedPhotos.slice(1, 3).map((url, idx) => (
           <div key={idx} className="rounded-lg overflow-hidden shadow-lg">
             <img src={url} alt={`Showcase ${idx + 2}`} className="w-full h-[280px] object-cover" />
           </div>
         ))}
       </div>
 
-      {/* Chat Option */}
+      {/* Chat Option (still visible for everyone except owner) */}
       {!isOwnProfile && (
         <div className="text-center mb-14">
           {currentUser ? (
@@ -198,7 +273,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Embedded Login Modal */}
+      {/* Login Modal */}
       {showLogin && !currentUser && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg w-96">
@@ -206,14 +281,14 @@ export default function ProfilePage() {
             <form onSubmit={handleSignIn} className="mb-4">
               <input
                 type="email"
-                placeholder=""
+                placeholder="Email"
                 className="w-full mb-3 p-2 border rounded"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
               <input
                 type="password"
-                placeholder=""
+                placeholder="Password"
                 className="w-full mb-3 p-2 border rounded"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -241,6 +316,7 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Chat Window */}
       {isChatVisible && chatId && currentUser && (
         <div className="max-w-2xl mx-auto mt-10">
           <ChatWindow chatId={chatId} currentUserId={currentUser.uid} />

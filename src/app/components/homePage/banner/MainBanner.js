@@ -1,33 +1,36 @@
 'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Promises } from "../atoms/Promises";
+import { Playfair_Display } from "next/font/google";
+
+// Elegant serif similar to Claude Docs
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 export default function MainBanner() {
   const textRef = useRef(null);
   const revealRef = useRef(null);
+  const [fontStyle, setFontStyle] = useState({ fontSize: '4rem', lineHeight: '1.2rem' });
 
+  // Animate logo text
   useEffect(() => {
-    let outerTimer;
-    let innerTimer;
-    let typingInterval;
+    let outerTimer, innerTimer, typingInterval;
 
     outerTimer = setTimeout(() => {
       const source = textRef.current;
       const target = document.getElementById("navbarTextTarget");
-
       if (!source || !target) return;
 
-      // Fade out the original text
       source.style.transition = "opacity 0.3s ease-out";
       source.style.opacity = "0";
 
-      // Clone the original and animate it
       const clone = source.cloneNode(true);
       const sourceRect = source.getBoundingClientRect();
-
-      const isMobile = window.innerWidth < 768; // mobile detection
+      const isMobile = window.innerWidth < 768;
 
       Object.assign(clone.style, {
         position: "fixed",
@@ -35,7 +38,7 @@ export default function MainBanner() {
         top: `${sourceRect.top}px`,
         margin: "0",
         zIndex: "9999",
-        fontSize: isMobile ? "3rem" : "5rem", // smaller for mobile
+        fontSize: isMobile ? "3rem" : "5rem",
         fontWeight: "bold",
         color: "white",
         transition: "all 1s ease-in-out",
@@ -47,7 +50,6 @@ export default function MainBanner() {
       document.body.appendChild(clone);
 
       const targetRect = target.getBoundingClientRect();
-
       requestAnimationFrame(() => {
         Object.assign(clone.style, {
           left: `${targetRect.left}px`,
@@ -57,43 +59,45 @@ export default function MainBanner() {
         });
       });
 
-      // Inner delay
       innerTimer = setTimeout(() => {
         target.style.opacity = "1";
         clone.remove();
 
-        // Start typing the follow-up message
-        const phrase =
-          "Håndlagde produkter fra vakre ville Nord-Norge";
+        const phrase = "Håndlagde produkter fra vakre ville Nord-Norge";
         const container = revealRef.current;
         if (!container) return;
 
         container.innerHTML = "";
 
-        let i = 0;
-        const baseSpeed = isMobile ? 30 : 40;
-        const speed = Math.round(baseSpeed * 1.2);
+        const words = phrase.split(" ");
+        words.forEach((word) => {
+          const wordSpan = document.createElement("span");
+          wordSpan.style.whiteSpace = "nowrap"; // keep the word on one line
+          wordSpan.style.marginRight = "0.3em"; // space between words
 
-        typingInterval = setInterval(() => {
-          if (!container) {
-            clearInterval(typingInterval);
-            return;
-          }
-
-          if (i < phrase.length) {
+          word.split("").forEach((char) => {
             const span = document.createElement("span");
-            span.textContent = phrase[i];
+            span.textContent = char;
             span.style.opacity = "0";
             span.style.transition = "opacity 0.3s ease";
-            container.appendChild(span);
-            requestAnimationFrame(() => {
-              span.style.opacity = "1";
-            });
-            i++;
+            span.style.display = "inline-block";
+            wordSpan.appendChild(span);
+          });
+
+          container.appendChild(wordSpan);
+        });
+
+        // Animate letters one by one
+        let letterIndex = 0;
+        const spans = container.querySelectorAll("span > span"); // all letters
+        typingInterval = setInterval(() => {
+          if (letterIndex < spans.length) {
+            spans[letterIndex].style.opacity = "1";
+            letterIndex++;
           } else {
             clearInterval(typingInterval);
           }
-        }, speed);
+        }, isMobile ? 30 : 50);
       }, 1000);
     }, 2000);
 
@@ -104,11 +108,33 @@ export default function MainBanner() {
     };
   }, []);
 
+  // Dynamic font size & vertical spacing
+  useEffect(() => {
+    const updateFont = () => {
+      const width = window.innerWidth;
+
+      const fontSize = Math.max(2.8, width / 370);
+
+      let lineHeightMultiplier;
+      if (width < 768) lineHeightMultiplier = 1.2; // smaller vertical spacing on small screens
+      else if (width < 1600) lineHeightMultiplier = 1.45; // medium
+      else lineHeightMultiplier = 1.6; // large
+
+      const lineHeight = fontSize * lineHeightMultiplier;
+
+      setFontStyle({ fontSize: `${fontSize}rem`, lineHeight: `${lineHeight}rem` });
+    };
+
+    updateFont();
+    window.addEventListener("resize", updateFont);
+    return () => window.removeEventListener("resize", updateFont);
+  }, []);
+
   return (
     <div className="relative z-10">
       <div className="mainBanner-cover bg-cover bg-center w-full min-h-[50vw] sm:min-h-[40vw] relative flex flex-col items-center justify-center overflow-visible">
         <Image
-          src="https://en.visitbergen.com/imageresizer/?image=%2Fdmsimgs%2F1_Highland_2400x1200_98407125.jpg&action=ProductDetailExtraLargeNew"
+          src="https://firebasestorage.googleapis.com/v0/b/norland-a7730.appspot.com/o/products%2Fe4f4bb0f-812f-4dfc-b87b-897a088d1687?alt=media&token=b54ead1b-cbfd-40bd-b9bf-6fe98425d39a"
           alt="Main Banner"
           fill
           priority
@@ -127,16 +153,16 @@ export default function MainBanner() {
 
         <div
           ref={revealRef}
-          className="text-3xl sm:text-4xl text-center p-4 z-20 md:text-7xl 
-                     max-w-496
-                     min-w-[60vw]
-                     [@media(min-width:700px)and(max-width:1270px)]:min-w-[70vw]
-                     [@media(min-width:2000px)]:min-w-[50vw]
-                     [@media(min-width:700px)and(max-width:1270px)]:text-[3.5rem]
-                     [@media(min-width:2000px)]:text-[5rem]" style={{ color: '#ffed29ff' }}
+          className={`${playfair.className} text-center p-4 z-20`}
+          style={{
+            color: '#cfbe20ff',
+            fontWeight: "700",
+            letterSpacing: "0.04em",
+            fontSize: fontStyle.fontSize,
+            lineHeight: fontStyle.lineHeight,
+          }}
         ></div>
 
-        {/* Promises anchored near bottom of banner */}
         <div className="absolute bottom-6 left-0 right-0 flex justify-center z-40">
           <Promises />
         </div>

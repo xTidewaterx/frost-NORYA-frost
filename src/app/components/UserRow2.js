@@ -1,67 +1,43 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase/firebaseConfig';
 import Link from 'next/link';
 
-const users = [
-  {
-    id: 'user_001',
-    uid: 'johan001',
-    displayName: 'Johan Myhre',
-    title: 'Designer & Explorer',
-    photoURL: 'https://cdn.booniez.com/i/d/dale-of-norway-valle-sweater-bla-7868-f',
-  },
-  {
-    id: 'user_002',
-    uid: 'ilia002',
-    displayName: 'Ilia Lind',
-    title: 'Creative Strategist',
-    photoURL: 'https://eu.daleofnorway.com/globalassets/dale-of-norway/produktbilder/81951-christiania-womens-jacket/81951_d00_life.jpg?mode=max&width=2000&height=2000',
-  },
-  {
-    id: 'user_003',
-    uid: 'siri003',
-    displayName: 'Siri Stoltenberg',
-    title: 'Visual Artist',
-    photoURL: 'https://www.produits-scandinaves.com/20716-large_default/trondheim-men-sweater-dale-of-norway.jpg',
-  },
-  {
-    id: 'user_004',
-    uid: 'nora004',
-    displayName: 'Nora Lyvia',
-    title: 'Brand Architect',
-    photoURL: 'https://lh6.googleusercontent.com/proxy/rWFDLN3670M0-35y9mUM0AsA0MrU0SXYY5WUiCNQsJK7T09cf_XQsSc3G7tg2SWOC1iqIme2xJ_uAEKcM9M94EFa1vStW2Y8fNyVI7j-3HcXUFZP4HmJuAxEfqSjD38DntkJsUzxORNYpc4sNI1nyQrdM2H6FJFAzNPjED5aa5w_mQaM',
-  },
-  {
-    id: 'user_005',
-    uid: 'johan005',
-    displayName: 'Johan Myhre',
-    title: 'Outdoor Stylist',
-    photoURL: 'https://cdn.booniez.com/i/d/dale-of-norway-valle-sweater-bla-7868-f',
-  },
-  {
-    id: 'user_006',
-    uid: 'ilia006',
-    displayName: 'Ilia Lind',
-    title: 'Content Curator',
-    photoURL: 'https://eu.daleofnorway.com/globalassets/dale-of-norway/produktbilder/81951-christiania-womens-jacket/81951_d00_life.jpg?mode=max&width=2000&height=2000',
-  },
-  {
-    id: 'user_007',
-    uid: 'siri007',
-    displayName: 'Siri Stoltenberg',
-    title: 'Fashion Technologist',
-    photoURL: 'https://www.produits-scandinaves.com/20716-large_default/trondheim-men-sweater-dale-of-norway.jpg',
-  },
-  {
-    id: 'user_008',
-    uid: 'nora008',
-    displayName: 'Nora Lyvia',
-    title: 'Cultural Designer',
-    photoURL: 'https://lh6.googleusercontent.com/proxy/rWFDLN3670M0-35y9mUM0AsA0MrU0SXYY5WUiCNQsJK7T09cf_XQsSc3G7tg2SWOC1iqIme2xJ_uAEKcM9M94EFa1vStW2Y8fNyVI7j-3HcXUFZP4HmJuAxEfqSjD38DntkJsUzxORNYpc4sNI1nyQrdM2H6FJFAzNPjED5aa5w_mQaM',
-  },
-];
+const DEFAULT_AVATAR_URL =
+  'https://firebasestorage.googleapis.com/v0/b/norland-a7730.appspot.com/o/profile%2FA%20rectangular%20default%20profile%20edit.png?alt=media&token=f00d3c5c-4d54-4af8-8f89-dba56cefb708';
 
-export default function UserRow2() {
+export default function UserRow() {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const snapshot = await getDocs(collection(db, 'publicUsers'));
+        const data = snapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter(
+            user =>
+              user.photoURL &&
+              user.uid &&
+              user.displayName &&
+              typeof user.photoURL === 'string' &&
+              typeof user.uid === 'string'
+          );
+        setUsers(data);
+        console.log('userRow: ', data);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      }
+    }
+
+    fetchUsers();
+  }, []);
+
   return (
     <div className="pb-12 md:pb-16 lg:pb-20">
       <section className="w-full py-12 mb-12 overflow-x-auto custom-scrollbar">
@@ -79,15 +55,19 @@ export default function UserRow2() {
                 href={`/profile/${user.uid}`}
                 className="transition-transform duration-300 ease-in-out hover:scale-[1.03]"
               >
-                <div className="avatar-wrapper  min-w-76 w-[50vw] sm:w-[180px] md:w-[220px] lg:w-[400px] aspect-square overflow-hidden shadow-md hover:ring-1 hover:ring-slate-300 transition-all">
+                <div className="avatar-wrapper min-w-76 w-[50vw] sm:w-[180px] md:w-[220px] lg:w-[400px] aspect-square overflow-hidden shadow-md hover:ring-1 hover:ring-slate-300 transition-all">
                   <img
                     src={user.photoURL}
                     alt={user.displayName}
+                    onError={(e) => {
+                      e.currentTarget.src = DEFAULT_AVATAR_URL;
+                    }}
                     className="w-full h-full object-cover"
                   />
                 </div>
               </Link>
-              <h3 className="text-base font-medium text-slate-800 text-center tracking-tight font-poppins">
+
+              <h3 className="text-base font-bold text-slate-900 text-center tracking-tight font-sans">
                 {user.displayName}
               </h3>
               <p className="text-sm text-slate-600 text-center leading-relaxed font-poppins">
@@ -119,6 +99,7 @@ export default function UserRow2() {
       <style jsx>{`
         .avatar-wrapper {
           clip-path: url(#superellipse);
+          border-radius: 0;
         }
       `}</style>
     </div>

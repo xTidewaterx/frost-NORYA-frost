@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase/firebaseConfig'; // Ensure this path is correct
+import { db } from '../../firebase/firebaseConfig';
 import Link from 'next/link';
 
 export default function UserRow() {
@@ -37,23 +37,6 @@ export default function UserRow() {
 
   return (
     <div className="pb-12 md:pb-16 lg:pb-20">
-      {/* SVG Superellipse Definition */}
-      <svg width="0" height="0">
-        <defs>
-          <clipPath id="superellipse" clipPathUnits="objectBoundingBox">
-            {/* Apple-style superellipse / squircle */}
-            <path d="
-              M0.5,0
-              C0.776,0,1,0.224,1,0.5
-              C1,0.776,0.776,1,0.5,1
-              C0.224,1,0,0.776,0,0.5
-              C0,0.224,0.224,0,0.5,0
-              Z
-            " />
-          </clipPath>
-        </defs>
-      </svg>
-
       <section className="w-full py-12 mb-12 overflow-x-auto custom-scrollbar">
         <h2 className="text-3xl mb-10 text-slate-900 tracking-tight leading-tight font-poppins pl-4">
           Skapere
@@ -69,17 +52,32 @@ export default function UserRow() {
                 href={`/profile/${user.uid}`}
                 className="transition-transform duration-300 ease-in-out hover:scale-[1.03]"
               >
-                <div className="avatar-wrapper min-w-76 w-[50vw] sm:w-[180px] md:w-[220px] lg:w-[400px] aspect-square overflow-hidden shadow-md hover:ring-1 hover:ring-slate-300 transition-all relative">
+                <div
+                  className="avatar-wrapper min-w-76 w-[50vw] sm:w-[180px] md:w-[220px] lg:w-[400px] aspect-square overflow-hidden shadow-md hover:ring-1 hover:ring-slate-300 transition-all"
+                  style={{
+                    backgroundImage: `url(${user.photoURL || '/default-avatar.png'})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    WebkitClipPath: 'url(#superellipse)',
+                    clipPath: 'url(#superellipse)',
+                  }}
+                >
                   <img
                     src={user.photoURL}
-                    alt={user.displayName}
-                    style={{ clipPath: 'url(#superellipse)' }}
-                    className="w-full h-full object-cover"
+                    alt=""
+                    style={{ display: 'none' }}
+                    onError={(e) => {
+                      const wrapper = e.currentTarget.parentElement;
+                      if (wrapper) {
+                        wrapper.style.backgroundImage = "url('/default-avatar.png')";
+                      }
+                    }}
                   />
                 </div>
               </Link>
 
-              <h3 className="text-base font-medium text-slate-800 text-center tracking-tight font-poppins">
+              <h3 className="text-base font-bold text-slate-900 text-center tracking-tight font-sans">
                 {user.displayName}
               </h3>
               <p className="text-sm text-slate-600 text-center leading-relaxed font-poppins">
@@ -88,12 +86,29 @@ export default function UserRow() {
             </div>
           ))}
         </div>
+
+        {/* SVG Superellipse Definition */}
+        <svg width="0" height="0">
+          <defs>
+            <clipPath id="superellipse" clipPathUnits="objectBoundingBox">
+              <path
+                d="
+                  M0.5,0
+                  C0.85,0,1,0.15,1,0.5
+                  C1,0.85,0.85,1,0.5,1
+                  C0.15,1,0,0.85,0,0.5
+                  C0,0.15,0.15,0,0.5,0
+                  Z
+                "
+              />
+            </clipPath>
+          </defs>
+        </svg>
       </section>
 
       <style jsx>{`
         .avatar-wrapper {
-          /* fallback rounded shape for browsers that don't support clip-path */
-          border-radius: 20%; /* approximate squircle fallback */
+          border-radius: 0;
         }
       `}</style>
     </div>
