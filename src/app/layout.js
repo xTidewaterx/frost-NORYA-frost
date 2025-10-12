@@ -14,7 +14,9 @@ import {
   Libre_Baskerville,
   Oswald,
   Bebas_Neue,
-  Manrope, // 👈 new font
+  Manrope,
+  Della_Respira,
+  Raleway,
 } from "next/font/google";
 
 import "./globals.css";
@@ -44,12 +46,16 @@ const greatVibes = Great_Vibes({ variable: "--font-greatvibes", weight: ['400'],
 const ebGaramond = EB_Garamond({ variable: "--font-ebgaramond", weight: ['400', '700'], subsets: ["latin"] });
 const libreBaskerville = Libre_Baskerville({ variable: "--font-libre", weight: ['400', '700'], subsets: ["latin"] });
 
-// Optional: tall/bold display fonts
+// Display fonts
 const oswald = Oswald({ variable: "--font-oswald", weight: ['700'], subsets: ["latin"] });
 const bebasNeue = Bebas_Neue({ variable: "--font-bebas", weight: ['400'], subsets: ["latin"] });
 
-// 👈 Manrope as Claude Sans alternative
+// Modern fonts
 const manrope = Manrope({ variable: "--font-manrope", weight: ['400', '700'], subsets: ["latin"] });
+
+// Added elegant Claude-style combo
+const dellaRespira = Della_Respira({ variable: "--font-dellarespira", weight: ['400'], subsets: ["latin"] });
+const raleway = Raleway({ variable: "--font-raleway", weight: ['400', '700'], subsets: ["latin"] });
 
 export const metadata = {
   title: "Create Next App",
@@ -75,7 +81,9 @@ export default function RootLayout({ children }) {
           ${libreBaskerville.variable} 
           ${oswald.variable} 
           ${bebasNeue.variable} 
-          ${manrope.variable} 
+          ${manrope.variable}
+          ${dellaRespira.variable}
+          ${raleway.variable}
           antialiased`}
       >
         <AuthProvider>

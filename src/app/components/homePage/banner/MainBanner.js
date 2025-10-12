@@ -3,18 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Promises } from "../atoms/Promises";
-import { Playfair_Display } from "next/font/google";
+import { Poppins } from "next/font/google";
 
-// Elegant serif similar to Claude Docs
-const playfair = Playfair_Display({
+// Modern sans-serif for clean elegance
+const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600"],
 });
 
 export default function MainBanner() {
   const textRef = useRef(null);
   const revealRef = useRef(null);
-  const [fontStyle, setFontStyle] = useState({ fontSize: '4rem', lineHeight: '1.2rem' });
+  const [fontStyle, setFontStyle] = useState({ fontSize: "6.5rem", lineHeight: "1.2rem" });
 
   // Animate logo text
   useEffect(() => {
@@ -63,17 +63,18 @@ export default function MainBanner() {
         target.style.opacity = "1";
         clone.remove();
 
-        const phrase = "Håndlagde produkter fra vakre ville Nord-Norge";
+        const phrase = "NORDNORSK HÅNDVERK";
         const container = revealRef.current;
         if (!container) return;
 
         container.innerHTML = "";
 
         const words = phrase.split(" ");
-        words.forEach((word) => {
-          const wordSpan = document.createElement("span");
-          wordSpan.style.whiteSpace = "nowrap"; // keep the word on one line
-          wordSpan.style.marginRight = "0.3em"; // space between words
+        words.forEach((word, i) => {
+          const wordDiv = document.createElement("div");
+          wordDiv.style.display = "block";
+          wordDiv.style.textAlign = "center";
+          wordDiv.style.marginBottom = i === 0 ? "0.1em" : "0";
 
           word.split("").forEach((char) => {
             const span = document.createElement("span");
@@ -81,15 +82,14 @@ export default function MainBanner() {
             span.style.opacity = "0";
             span.style.transition = "opacity 0.3s ease";
             span.style.display = "inline-block";
-            wordSpan.appendChild(span);
+            wordDiv.appendChild(span);
           });
 
-          container.appendChild(wordSpan);
+          container.appendChild(wordDiv);
         });
 
-        // Animate letters one by one
         let letterIndex = 0;
-        const spans = container.querySelectorAll("span > span"); // all letters
+        const spans = container.querySelectorAll("span");
         typingInterval = setInterval(() => {
           if (letterIndex < spans.length) {
             spans[letterIndex].style.opacity = "1";
@@ -102,26 +102,35 @@ export default function MainBanner() {
     }, 2000);
 
     return () => {
-      if (outerTimer) clearTimeout(outerTimer);
-      if (innerTimer) clearTimeout(innerTimer);
-      if (typingInterval) clearInterval(typingInterval);
+      clearTimeout(outerTimer);
+      clearTimeout(innerTimer);
+      clearInterval(typingInterval);
     };
   }, []);
 
-  // Dynamic font size & vertical spacing
+  // Dynamic font scaling — balanced across all devices
   useEffect(() => {
     const updateFont = () => {
       const width = window.innerWidth;
+      let fontSize;
 
-      const fontSize = Math.max(2.8, width / 370);
+      if (width <= 768) {
+        // Slightly larger on small screens
+        fontSize = Math.max(width / 150, 3.2);
+      } else if (width <= 2500) {
+        // Normal scaling up to ~27"
+        fontSize = Math.max(width / 170, 2.8);
+      } else {
+        // Softer scaling beyond 27" (43" ultrawide), 20% smaller
+        fontSize = Math.max((width / 140) * 0.8, 2.8);
+      }
 
       let lineHeightMultiplier;
-      if (width < 768) lineHeightMultiplier = 1.2; // smaller vertical spacing on small screens
-      else if (width < 1600) lineHeightMultiplier = 1.45; // medium
-      else lineHeightMultiplier = 1.6; // large
+      if (width < 768) lineHeightMultiplier = 1.15;
+      else if (width < 1600) lineHeightMultiplier = 1.3;
+      else lineHeightMultiplier = 1.4;
 
       const lineHeight = fontSize * lineHeightMultiplier;
-
       setFontStyle({ fontSize: `${fontSize}rem`, lineHeight: `${lineHeight}rem` });
     };
 
@@ -153,13 +162,15 @@ export default function MainBanner() {
 
         <div
           ref={revealRef}
-          className={`${playfair.className} text-center p-4 z-20`}
+          className={`${poppins.className} text-center p-4 z-20 max-w-[90%] sm:max-w-[70%] relative -translate-y-6 sm:-translate-y-12 font-medium tracking-[0.05em]`}
           style={{
-            color: '#cfbe20ff',
-            fontWeight: "700",
-            letterSpacing: "0.04em",
+            color: "#cfbe20ff",
             fontSize: fontStyle.fontSize,
             lineHeight: fontStyle.lineHeight,
+            whiteSpace: "nowrap",       // Never break words
+            overflowWrap: "normal",      // No wrapping
+            wordBreak: "keep-all",       // Keep each word together
+            textTransform: "uppercase",
           }}
         ></div>
 
