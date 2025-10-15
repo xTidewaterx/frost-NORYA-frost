@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Promises } from "../atoms/Promises";
 import { Poppins } from "next/font/google";
 
-// Modern sans-serif for clean elegance
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
@@ -16,21 +15,29 @@ export default function MainBanner() {
   const revealRef = useRef(null);
   const [fontStyle, setFontStyle] = useState({ fontSize: "6.5rem", lineHeight: "1.2rem" });
 
-  // Animate logo text
   useEffect(() => {
-    let outerTimer, innerTimer, typingInterval;
+    let outerTimer, innerTimer, fadeTimer, typingInterval;
 
     outerTimer = setTimeout(() => {
       const source = textRef.current;
       const target = document.getElementById("navbarTextTarget");
-      if (!source || !target) return;
+      const logo = document.getElementById("navbarLogo");
+      if (!source || !target || !logo) return;
 
-      source.style.transition = "opacity 0.3s ease-out";
+      source.style.transition = "opacity 0.4s ease-out";
       source.style.opacity = "0";
 
       const clone = source.cloneNode(true);
       const sourceRect = source.getBoundingClientRect();
+      const logoRect = logo.getBoundingClientRect();
       const isMobile = window.innerWidth < 768;
+      const gap = 8;
+
+      const deltaX = logoRect.right + gap - sourceRect.left;
+      const deltaY = logoRect.top + logoRect.height * 0.66 - sourceRect.top;
+
+      const computedStyle = window.getComputedStyle(source);
+      const originalFontSize = computedStyle.fontSize;
 
       Object.assign(clone.style, {
         position: "fixed",
@@ -38,30 +45,36 @@ export default function MainBanner() {
         top: `${sourceRect.top}px`,
         margin: "0",
         zIndex: "9999",
-        fontSize: isMobile ? "3rem" : "5rem",
-        fontWeight: "bold",
+        fontSize: originalFontSize,
+        fontWeight: "bold", // same as original
         color: "white",
-        transition: "all 1s ease-in-out",
+        transition: "transform 4.2s ease-in-out",
         transformOrigin: "top left",
         pointerEvents: "none",
         whiteSpace: "nowrap",
+        opacity: "1",
+        transform: "translate(0, 0) scale(1)",
       });
 
       document.body.appendChild(clone);
 
-      const targetRect = target.getBoundingClientRect();
       requestAnimationFrame(() => {
-        Object.assign(clone.style, {
-          left: `${targetRect.left}px`,
-          top: `${targetRect.top}px`,
-          opacity: "0.5",
-          transform: "scale(0.6)",
+        clone.style.transform = "translate(0, 0) scale(1)";
+        clone.style.opacity = "1";
+
+        requestAnimationFrame(() => {
+          clone.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.2)`; // final scale
         });
       });
 
+      fadeTimer = setTimeout(() => {
+        clone.style.transition += ", opacity 0.6s ease-out";
+        clone.style.opacity = "0";
+      }, 3600);
+
       innerTimer = setTimeout(() => {
-        target.style.opacity = "1";
         clone.remove();
+        target.style.opacity = "1";
 
         const phrase = "NORDNORSK HÅNDVERK";
         const container = revealRef.current;
@@ -98,30 +111,27 @@ export default function MainBanner() {
             clearInterval(typingInterval);
           }
         }, isMobile ? 30 : 50);
-      }, 1000);
+      }, 4200);
     }, 2000);
 
     return () => {
       clearTimeout(outerTimer);
       clearTimeout(innerTimer);
+      clearTimeout(fadeTimer);
       clearInterval(typingInterval);
     };
   }, []);
 
-  // Dynamic font scaling — balanced across all devices
   useEffect(() => {
     const updateFont = () => {
       const width = window.innerWidth;
       let fontSize;
 
       if (width <= 768) {
-        // Slightly larger on small screens
         fontSize = Math.max(width / 150, 3.2);
       } else if (width <= 2500) {
-        // Normal scaling up to ~27"
         fontSize = Math.max(width / 170, 2.8);
       } else {
-        // Softer scaling beyond 27" (43" ultrawide), 20% smaller
         fontSize = Math.max((width / 140) * 0.8, 2.8);
       }
 
@@ -167,9 +177,9 @@ export default function MainBanner() {
             color: "#cfbe20ff",
             fontSize: fontStyle.fontSize,
             lineHeight: fontStyle.lineHeight,
-            whiteSpace: "nowrap",       // Never break words
-            overflowWrap: "normal",      // No wrapping
-            wordBreak: "keep-all",       // Keep each word together
+            whiteSpace: "nowrap",
+            overflowWrap: "normal",
+            wordBreak: "keep-all",
             textTransform: "uppercase",
           }}
         ></div>

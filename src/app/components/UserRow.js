@@ -46,7 +46,7 @@ export default function UserRow() {
           {users.map(user => (
             <div
               key={user.id}
-              className="min-w-[260px] flex flex-col items-center shrink-0 gap-3"
+              className="min-w-[260px] flex flex-col items-center shrink-0 gap-3 pl-12"
             >
               <Link
                 href={`/profile/${user.uid}`}
